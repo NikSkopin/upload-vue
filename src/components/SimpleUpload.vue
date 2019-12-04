@@ -1,9 +1,11 @@
 <template>
   <form @submit.prevent="sendFile" enctype="multipart/form-data">
+    <div v-if="message" :class="`message ${error ? 'is-danger' : 'is-success'}`">
+      <div class="message-body">{{message}}</div>
+    </div>
     <div class="field">
       <div class="file is-boxed is-primary">
-        <label for class="file-label">
-          <input type="file" @change="selectFile" ref="file" class="file-input" />
+        <label class="file-label">
           <span class="file-cta">
             <span class="file-icon">
               <i class="fas fa-upload"></i>
@@ -12,6 +14,8 @@
           </span>
           <span v-if="file" class="file-name">{{file.name}}</span>
         </label>
+        <!-- FIXME: input consumes all width -->
+        <input type="file" name="file" @change="selectFile" ref="file" class="file-input" />
       </div>
     </div>
 
@@ -23,19 +27,22 @@
 
 <script>
 import axios from "axios";
-import { log } from "util";
 export default {
   name: "SimpleUpload",
 
   data() {
     return {
-      file: ""
+      file: "",
+      message: "",
+      error: false
     };
   },
 
   methods: {
     selectFile() {
       this.file = this.$refs.file.files[0];
+      this.error = false;
+      this.message = "";
     },
 
     async sendFile() {
@@ -45,8 +52,12 @@ export default {
 
       try {
         await axios.post("/upload", formData);
+        this.message = "File has been uploaded";
+        this.file = "";
+        this.error = false;
       } catch (error) {
-        console.log(error);
+        this.message = "Something went wrong";
+        this.error = true;
       }
     }
   }
