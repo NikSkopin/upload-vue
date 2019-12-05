@@ -40,9 +40,21 @@ export default {
 
   methods: {
     selectFile() {
-      this.file = this.$refs.file.files[0];
-      this.error = false;
-      this.message = "";
+      const file = this.$refs.file.files[0];
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      const MAX_SIZE = 200000;
+      const tooLarge = file.size > MAX_SIZE;
+
+      if (allowedTypes.includes(file.type) && !tooLarge) {
+        this.file = file;
+        this.error = false;
+        this.message = "";
+      } else {
+        this.error = true;
+        this.message = tooLarge
+          ? `Too large. Max size is ${MAX_SIZE / 1000} Kb`
+          : "Only images are allowed";
+      }
     },
 
     async sendFile() {
@@ -56,7 +68,7 @@ export default {
         this.file = "";
         this.error = false;
       } catch (error) {
-        this.message = "Something went wrong";
+        this.message = error.response.data.error;
         this.error = true;
       }
     }
