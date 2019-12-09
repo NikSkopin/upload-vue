@@ -1,12 +1,11 @@
 <template>
   <div class="section">
     <div class="container">
-      <div class="columns">
-        <div class="column">
-          <SimpleUpload />
-        </div>
-        <div class="column">
-          <MultipleUpload />
+      <div class="columns is-centered">
+        <div class="column is-two-thirds">
+          <div class="box has-text-centered">
+            <MultipleUpload />
+          </div>
         </div>
       </div>
     </div>
@@ -14,11 +13,16 @@
 </template>
 
 <script>
-import SimpleUpload from "./components/SimpleUpload.vue";
 import MultipleUpload from "./components/MultipleUpload.vue";
 
 export default {
   name: "App",
-  components: { SimpleUpload, MultipleUpload }
+  components: { MultipleUpload }
 };
 </script>
+<style >
+.centered-label {
+  width: 70%;
+  margin: 0 auto;
+}
+</style>

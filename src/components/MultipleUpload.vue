@@ -7,16 +7,7 @@
       <div class="message-body">{{ message }}</div>
     </div>
     <div class="field">
-      <div class="file is-boxed is-warning">
-        <label class="file-label">
-          <span class="file-cta">
-            <span class="file-icon">
-              <i class="fas fa-upload"></i>
-            </span>
-            <span class="file-label">Choose a file...</span>
-          </span>
-        </label>
-        <!-- FIXME: input consumes all width -->
+      <div class="dropzone">
         <input
           multiple
           type="file"
@@ -25,6 +16,19 @@
           ref="files"
           class="file-input"
         />
+
+        <div v-if="!uploading" class="call-to-action">
+          <span>Click to choose or drag your files here</span>
+        </div>
+        <div v-if="uploading" class="progress-bar"></div>
+      </div>
+
+      <div class="content">
+        <ul>
+          <li v-for="file in uploadedFiles" :key="file.originalname">
+            {{ file.originalname }}
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -67,7 +71,10 @@ export default {
       files: [],
       uploadFiles: [],
       message: "",
-      error: false
+      error: false,
+      uploading: false,
+      uploadedFiles: [],
+      progress: 0
     };
   },
 
@@ -115,7 +122,11 @@ export default {
       });
 
       try {
-        await axios.post("/multiple", formData);
+        const res = await axios.post("/upload", formData);
+        res.data.files.map(item => {
+          this.uploadedFiles.push(item);
+        });
+
         this.message = "Files has been uploaded";
         this.files = [];
         this.uploadFiles = [];
@@ -127,3 +138,33 @@ export default {
   }
 };
 </script>
+<style scoped>
+.dropzone {
+  min-height: 200px;
+  padding: 10px;
+  position: relative;
+  cursor: pointer;
+  outline: 2px dashed grey;
+  outline-offset: -10px;
+  background: lightcyan;
+  color: dimgray;
+}
+
+.input-file {
+  opacity: 0;
+  width: 100%;
+  height: 200px;
+  position: absolute;
+  cursor: pointer;
+}
+
+.dropzone:hover {
+  background-color: lightblue;
+}
+
+.dropzone .call-to-action {
+  font-size: 1.1rem;
+  text-align: center;
+  padding-top: 70px;
+}
+</style>
