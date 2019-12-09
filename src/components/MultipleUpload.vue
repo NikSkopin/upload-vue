@@ -20,7 +20,11 @@
         <div v-if="!uploading" class="call-to-action">
           <span>Click to choose or drag your files here</span>
         </div>
-        <div v-if="uploading" class="progress-bar"></div>
+        <div v-if="uploading" class="progress-bar">
+          <progress class="progress is-primary" :value="progress" max="100">
+            <span>{{ progress }} %</span>
+          </progress>
+        </div>
       </div>
 
       <div class="content">
@@ -95,7 +99,12 @@ export default {
     },
     validate(file) {
       const MAX_SIZE = 200000;
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "video/x-matroska"
+      ];
 
       if (!allowedTypes.includes(file.type)) {
         return "Not an image";
@@ -122,7 +131,11 @@ export default {
       });
 
       try {
-        const res = await axios.post("/upload", formData);
+        this.uploading = true;
+        const res = await axios.post("/upload", formData, {
+          onUploadProgress: e =>
+            (this.progress = Math.round((e.loaded * 100) / e.total))
+        });
         res.data.files.map(item => {
           this.uploadedFiles.push(item);
         });
@@ -130,9 +143,11 @@ export default {
         this.message = "Files has been uploaded";
         this.files = [];
         this.uploadFiles = [];
+        this.uploading = false;
       } catch (error) {
         this.message = error.response.data.error;
         this.error = true;
+        this.uploading = false;
       }
     }
   }
@@ -166,5 +181,10 @@ export default {
   font-size: 1.1rem;
   text-align: center;
   padding-top: 70px;
+}
+
+.dropzone .progress-bar {
+  text-align: center;
+  padding: 70px 10px;
 }
 </style>
